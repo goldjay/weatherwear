@@ -1,0 +1,9 @@
+{
+  "name": "weatherwear",
+  "description": "twitterbot that tweets what to wear for weather",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "openweather-apis": "^3.3.2"
+  }
+}
