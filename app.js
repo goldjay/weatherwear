@@ -35,32 +35,32 @@ Twitter.stream('statuses/filter', {track: '#weatherwear'}, function(stream) {
 
     //split up the tweet's text
     var tweetArr = tweet.text.split(" ");
+    var place;
 
-    // turn those Strings in to a floats
-    var place = tweetArr[0];
+    // If the place name is longer than one word i.e. el paso, etc
+    if(tweetArr.length > 2){
+      place = tweetArr[0] + tweetArr[1];
+    }else{
+      place = tweetArr[0];
+    }
+
     var currTemp = 0;
     weather.setCity(place);
 
     weather.getAllWeather(function(err, JSONObj){
-       //var obj = JSON.parse(JSONObj);
-       var temp = tempCovert(JSONObj.main.temp);
+       var temp = Math.floor(parseInt(tempCovertCtoF(JSONObj.main.temp)));
        var windSpeed = JSONObj.wind.speed;
-       var windChill = parseFloat(windChillCalc(temp, windSpeed));
+       var windChill = Math.floor(parseInt(windChillCalc(temp, windSpeed)));
+
+       console.log(typeof("Temp is a " + temp));
+
        // What to wear logic
        var reply = "Hi @" + tweet.user.screen_name + ", it is " + temp + ", but it feels like " + windChill + ". ";
 
        var min = JSONObj.main.temp_min;
        var max = JSONObj.main.temp_max;
-
        var rain = JSONObj.rain;
 
-
-
-       // Check if there is a large difference in min/max to wear layers
-
-
-       // Less than 41: Winter Coat
-       // 41 to
        if(temp > 90){
          reply += "Wear sunscreen! It's so hot."
        }
@@ -75,15 +75,13 @@ Twitter.stream('statuses/filter', {track: '#weatherwear'}, function(stream) {
          reply += "Layer up or wear a hat."
        }
        else{
-         reply += "It looks cold so you'd better wear a winter coat.";
+         reply += "Wow, it's freezing. You'd better wear a winter coat.";
        }
-
 
        // If It's raining in the next three hours
        if(rain > 0){
          reply += " -also, bring an umbrella.";
        }
-
 
        Twitter.post('statuses/update', {status: reply},  function(error, tweetReply, response){
 
@@ -94,38 +92,14 @@ Twitter.stream('statuses/filter', {track: '#weatherwear'}, function(stream) {
          //print the text of the tweet we sent out
          console.log(tweetReply.text);
        });
-   });
-
-/*
-    weather.getTemperature(function(err, temp){
-        //console.log(JSONObj);
-        console.log(temp);
-        var reply = "Hi @" + tweet.user.screen_name + ", it is " + temp + " degrees out.";
-
-        Twitter.post('statuses/update', {status: reply},  function(error, tweetReply, response){
-
-          //if we get an error print it out
-          if(error){
-              console.log(error)
-          }
-          //print the text of the tweet we sent out
-          console.log(tweetReply.text);
-        });
-
-
-
-      });
-*/
-
-    });
-  // ... when we get an error...
+     });
+  });
   stream.on('error', function(error) {
-    //print out the error
     console.log(error);
   });
 });
 
-function tempCovert(temp){
+function tempCovertCtoF(temp){
   return temp * 9 / 5 + 32;
 }
 
